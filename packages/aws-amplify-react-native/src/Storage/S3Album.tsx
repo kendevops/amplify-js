@@ -20,9 +20,17 @@ import S3Image from './S3Image';
 const logger = new Logger('Storage.S3Album');
 
 interface IS3AlbumProps {
+	fileToKey?: any;
 	path?: string;
-	level?: string;
+	identityId: any;
+	level?: any;
+	onError?: any;
+	onLoad?: any;
+	picker?: any;
+	pickerText?: any;
+	sort?: any;
 	filter?: Function;
+	track?: any;
 	theme?: AmplifyThemeType;
 }
 
@@ -35,6 +43,29 @@ export default class S3Album extends Component<IS3AlbumProps, IS3AlbumState> {
 		super(props);
 
 		this.state = { images: [] };
+	}
+
+	getKey(file) {
+		const { fileToKey } = this.props;
+
+		const { name, size, type } = file;
+		let key = encodeURI(name);
+		if (fileToKey) {
+			const callback_type = typeof fileToKey;
+			if (callback_type === 'string') {
+				key = fileToKey;
+			} else if (callback_type === 'function') {
+				key = fileToKey({ name, size, type });
+			} else {
+				key = encodeURI(JSON.stringify(fileToKey));
+			}
+			if (!key) {
+				logger.debug('key is empty');
+				key = 'empty_key';
+			}
+		}
+
+		return key.replace(/\s/g, '_');
 	}
 
 	componentDidMount() {
@@ -52,6 +83,8 @@ export default class S3Album extends Component<IS3AlbumProps, IS3AlbumState> {
 	}
 
 	render() {
+		const { picker, level, identityId } = this.props;
+		const pickerTitle = this.props.pickerTitle || 'Pick';
 		const { images } = this.state;
 		if (!images) {
 			return null;
@@ -77,6 +110,15 @@ export default class S3Album extends Component<IS3AlbumProps, IS3AlbumState> {
 		return (
 			<ScrollView {...this.props} style={albumStyle}>
 				{list}
+				{picker ? (
+					<Picker
+						key={ts}
+						title={pickerTitle}
+						accept="image/*, text/*"
+						onPick={this.handlePick}
+						theme={theme}
+					/>
+				) : null}
 			</ScrollView>
 		);
 	}

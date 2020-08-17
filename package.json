@@ -94,5 +94,10 @@
 	"jest": {
 		"resetMocks": true,
 		"verbose": true
+	},
+	"dependencies": {
+		"aws-amplify": "^3.0.23",
+		"react": "^16.13.1",
+		"react-native": "^0.63.2"
 	}
 }
