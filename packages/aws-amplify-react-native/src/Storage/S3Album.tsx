@@ -12,7 +12,13 @@
  */
 
 import React, { Component } from 'react';
-import { ScrollView, Dimensions, StyleSheet } from 'react-native';
+import {
+	ScrollView,
+	Dimensions,
+	StyleSheet,
+	Button,
+	TouchableOpacity,
+} from 'react-native';
 import { Storage, Logger } from 'aws-amplify';
 import AmplifyTheme, { AmplifyThemeType } from '../AmplifyTheme';
 import S3Image from './S3Image';
@@ -27,7 +33,7 @@ interface IS3AlbumProps {
 	onError?: any;
 	onLoad?: any;
 	picker?: any;
-	pickerText?: any;
+	pickerTitle?: any;
 	sort?: any;
 	filter?: Function;
 	track?: any;
@@ -41,7 +47,6 @@ interface IS3AlbumState {
 export default class S3Album extends Component<IS3AlbumProps, IS3AlbumState> {
 	constructor(props: IS3AlbumProps) {
 		super(props);
-		this.handlePick = this.handlePick.bind(this);
 		this.state = { images: [] };
 	}
 
@@ -137,14 +142,17 @@ export default class S3Album extends Component<IS3AlbumProps, IS3AlbumState> {
 		return (
 			<ScrollView {...this.props} style={albumStyle}>
 				{list}
-				{picker ? (
-					<Picker
-						key={ts}
-						title={pickerTitle}
-						accept="image/*, text/*"
-						theme={theme}
-					/>
-				) : null}
+				<TouchableOpacity style={theme.buttonText}>
+					{' '}
+					{picker ? (
+						<Button
+							key={ts}
+							title={pickerTitle}
+							accept="image/*, text/*"
+							theme={theme}
+						/>
+					) : null}
+				</TouchableOpacity>
 			</ScrollView>
 		);
 	}
