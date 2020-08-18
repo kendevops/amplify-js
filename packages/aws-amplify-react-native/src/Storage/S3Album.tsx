@@ -41,7 +41,7 @@ interface IS3AlbumState {
 export default class S3Album extends Component<IS3AlbumProps, IS3AlbumState> {
 	constructor(props: IS3AlbumProps) {
 		super(props);
-
+		this.handlePick = this.handlePick.bind(this);
 		this.state = { images: [] };
 	}
 
@@ -69,17 +69,44 @@ export default class S3Album extends Component<IS3AlbumProps, IS3AlbumState> {
 	}
 
 	componentDidMount() {
-		const { path, level, filter } = this.props;
-		logger.debug(path);
-		Storage.list(path, { level: level ? level : 'public' })
+		const {
+			path,
+			onLoad,
+			onError,
+			track,
+			level,
+			filter,
+			identityId,
+		} = this.props;
+		logger.debug('Album path: ' + path);
+		if (!Storage || typeof Storage.list !== 'function') {
+			throw new Error(
+				'No Storage module found, please ensure @aws-amplify/storage is imported'
+			);
+		}
+		Storage.list(path, {
+			level: level ? level : 'public',
+			track,
+			identityId,
+		})
 			.then(data => {
 				logger.debug(data);
 				if (filter) {
 					data = filter(data);
+				} else {
+					logger.debug('update an image');
+				}
+				if (onLoad) {
+					onLoad(data);
 				}
 				this.setState({ images: data });
 			})
-			.catch(err => logger.warn(err));
+			.catch(err => {
+				logger.debug('handle pick error', err);
+				if (onError) {
+					onError(err);
+				}
+			});
 	}
 
 	render() {
@@ -115,7 +142,6 @@ export default class S3Album extends Component<IS3AlbumProps, IS3AlbumState> {
 						key={ts}
 						title={pickerTitle}
 						accept="image/*, text/*"
-						onPick={this.handlePick}
 						theme={theme}
 					/>
 				) : null}
